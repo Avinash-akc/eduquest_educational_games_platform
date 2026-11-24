@@ -1,1612 +1,208 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduQuest — Interactive Educational Games Platform</title>
-  
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Plus Jakarta Sans', 'sans-serif'],
-          },
-          animation: {
-            'blob': 'blob 8s infinite',
-            'fade-in': 'fadeIn 0.35s ease-out forwards',
-            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-          },
-          keyframes: {
-            blob: {
-              '0%': { transform: 'translate(0px, 0px) scale(1)' },
-              '33%': { transform: 'translate(30px, -40px) scale(1.08)' },
-              '66%': { transform: 'translate(-20px, 20px) scale(0.94)' },
-              '100%': { transform: 'translate(0px, 0px) scale(1)' },
-            },
-            fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' },
-            },
-            slideUp: {
-              '0%': { opacity: '0', transform: 'translateY(16px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    /* Custom Glassmorphism & Scrollbar Utilities */
-    body {
-      background-color: #090d16;
-      color: #f8fafc;
-      overflow-x: hidden;
-    }
-    .glass-panel {
-      background: rgba(17, 24, 39, 0.72);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
-    }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.48);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .glass-card:hover {
-      background: rgba(30, 41, 59, 0.75);
-      border-color: rgba(129, 140, 248, 0.45);
-      transform: translateY(-3px);
-      box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.25);
-    }
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduQuest — Interactive Educational Games Platform</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white relative">
+<body>
+<div id="toast-container"></div>
 
-  <!-- Ambient Animated Background Blobs -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    <div class="absolute -top-24 -left-24 w-96 h-96 bg-indigo-600/25 rounded-full mix-blend-screen filter blur-3xl animate-blob"></div>
-    <div class="absolute top-1/3 -right-24 w-96 h-96 bg-fuchsia-600/20 rounded-full mix-blend-screen filter blur-3xl animate-blob" style="animation-delay: 2s;"></div>
-    <div class="absolute -bottom-24 left-1/3 w-96 h-96 bg-cyan-600/20 rounded-full mix-blend-screen filter blur-3xl animate-blob" style="animation-delay: 4s;"></div>
-    <!-- Subtle Grid Overlay -->
-    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px]"></div>
-  </div>
-
-  <!-- Toast Notification Banner (Replaces alert) -->
-  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- ===================================================================== -->
-  <!-- VIEW 1: AUTHENTICATION LANDING PAGE (INITIAL VIEW)                    -->
-  <!-- ===================================================================== -->
-  <section id="auth-view" class="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center animate-slide-up">
-      
-      <!-- Left Branding & Value Proposition -->
-      <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
-        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-sm font-semibold">
-          <span class="relative flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
-          </span>
-          Next-Gen Interactive Learning Arena
-        </div>
-
-        <h1 class="font-display text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-white">
-          Level Up Your Mind with <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">EduQuest</span>
-        </h1>
-
-        <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
-          Master Science, Mathematics, Social Science, General Knowledge, and Healthy Life Habits through bite-sized challenges, live XP streaks, and instant explanations.
-        </p>
-
-        <!-- Feature Highlights Grid -->
-        <div class="grid grid-cols-2 gap-3.5 pt-2 max-w-lg mx-auto lg:mx-0 text-left">
-          <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3">
-            <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 shrink-0">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-            </div>
-            <div>
-              <h3 class="font-semibold text-sm text-white">105+ Curated Questions</h3>
-              <p class="text-xs text-slate-400 mt-0.5">Physics, Chemistry, Biology & more</p>
-            </div>
-          </div>
-          <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3">
-            <div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            </div>
-            <div>
-              <h3 class="font-semibold text-sm text-white">Custom Quiz Length</h3>
-              <p class="text-xs text-slate-400 mt-0.5">Choose 5, 10, or 15 questions</p>
-            </div>
-          </div>
-          <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3">
-            <div class="p-2 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-            </div>
-            <div>
-              <h3 class="font-semibold text-sm text-white">XP & Achievement Badges</h3>
-              <p class="text-xs text-slate-400 mt-0.5">Track accuracy & climb levels</p>
-            </div>
-          </div>
-          <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3">
-            <div class="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 shrink-0">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-              <h3 class="font-semibold text-sm text-white">Instant Explanations</h3>
-              <p class="text-xs text-slate-400 mt-0.5">Learn why every answer works</p>
-            </div>
-          </div>
-        </div>
+<!-- AUTH -->
+<section id="auth-view" class="center-screen">
+  <div class="auth-wrap">
+    <div class="auth-intro">
+      <span class="pill">Next-Gen Interactive Learning Arena</span>
+      <h1>Level Up Your Mind with <span class="grad">EduQuest</span></h1>
+      <p>Master Science, Mathematics, Social Science, General Knowledge, and Healthy Life Habits through bite-sized challenges, XP streaks, and instant explanations.</p>
+      <div class="features">
+        <div class="feature"><b>105+ Curated Questions</b><small>Physics, Chemistry, Biology &amp; more</small></div>
+        <div class="feature"><b>Custom Quiz Length</b><small>Choose 5, 10, or 15 questions</small></div>
+        <div class="feature"><b>XP &amp; Achievement Badges</b><small>Track accuracy &amp; climb levels</small></div>
+        <div class="feature"><b>Instant Explanations</b><small>Learn why every answer works</small></div>
       </div>
-
-      <!-- Right Glassmorphism Auth Card -->
-      <div class="lg:col-span-6">
-        <div class="glass-panel rounded-3xl p-6 sm:p-8 max-w-md mx-auto">
-          
-          <!-- Brand Icon Header -->
-          <div class="flex items-center justify-center gap-3 mb-6">
-            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-            </div>
-            <span class="font-display font-bold text-2xl tracking-tight text-white">EduQuest</span>
-          </div>
-
-          <!-- Toggle Tabs: Login vs Create Account -->
-          <div class="grid grid-cols-2 p-1.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 mb-6">
-            <button id="tab-login" type="button" onclick="switchAuthTab('login')" class="py-2.5 text-sm font-semibold rounded-xl transition-all bg-indigo-600 text-white shadow-md">
-              Login
-            </button>
-            <button id="tab-register" type="button" onclick="switchAuthTab('register')" class="py-2.5 text-sm font-semibold rounded-xl transition-all text-slate-400 hover:text-white">
-              Create Account
-            </button>
-          </div>
-
-          <!-- LOGIN FORM -->
-          <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
-            <div>
-              <label for="login-email" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
-              <input id="login-email" type="email" required placeholder="student@eduquest.com" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition" />
-            </div>
-            <div>
-              <label for="login-password" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
-              <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition" />
-            </div>
-
-            <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition transform active:scale-[0.99] cursor-pointer">
-              Sign In to Dashboard
-            </button>
-
-            <div class="relative py-2">
-              <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
-              <div class="relative flex justify-center text-xs uppercase"><span class="bg-[#111827] px-3 text-slate-500">Or instant access</span></div>
-            </div>
-
-            <button type="button" onclick="handleDemoLogin()" class="w-full py-3 px-4 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-sm flex items-center justify-center gap-2 transition cursor-pointer">
-              <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
-              Quick Demo Guest Login
-            </button>
-          </form>
-
-          <!-- REGISTER FORM -->
-          <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
-            <div>
-              <label for="reg-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
-              <input id="reg-name" type="text" required placeholder="Aarav Sharma" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition" />
-            </div>
-            <div>
-              <label for="reg-email" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
-              <input id="reg-email" type="email" required placeholder="aarav@example.com" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition" />
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label for="reg-password" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
-                <input id="reg-password" type="password" required minlength="4" placeholder="Min 4 chars" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition" />
-              </div>
-              <div>
-                <label for="reg-grade" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Grade / Level</label>
-                <select id="reg-grade" class="w-full px-3.5 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition">
-                  <option value="Middle School">Middle School</option>
-                  <option value="High School" selected>High School</option>
-                  <option value="University">University</option>
-                  <option value="Lifelong Learner">Lifelong Learner</option>
-                </select>
-              </div>
-            </div>
-
-            <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold shadow-lg shadow-emerald-600/25 transition transform active:scale-[0.99] cursor-pointer mt-2">
-              Create Free Account
-            </button>
-          </form>
-
-        </div>
-      </div>
-
     </div>
-  </section>
 
-  <!-- ===================================================================== -->
-  <!-- VIEW 2: MAIN PLATFORM SHELL (HEADER + DASHBOARD / QUIZ / RESULTS)     -->
-  <!-- ===================================================================== -->
-  <div id="app-shell" class="hidden relative z-10 flex-1 flex flex-col">
-    
-    <!-- Top Sticky Navigation Bar -->
-    <header class="sticky top-0 z-30 glass-panel border-b border-slate-800/80">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
-        
-        <!-- Logo & Home Button -->
-        <button onclick="navigateTo('dashboard')" class="flex items-center gap-2.5 text-left group cursor-pointer">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md group-hover:scale-105 transition">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-          </div>
-          <div>
-            <span class="font-display font-bold text-lg text-white tracking-tight block leading-none">EduQuest</span>
-            <span class="text-[11px] text-indigo-400 font-medium hidden sm:inline">Interactive Learning</span>
-          </div>
-        </button>
-
-        <!-- Center/Right User Stats Pills & Controls -->
-        <div class="flex items-center gap-2 sm:gap-3">
-          
-          <!-- XP & Level Pill -->
-          <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80">
-            <span class="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 text-xs font-bold" id="nav-level">Lvl 1</span>
-            <span class="text-xs font-semibold text-amber-400 flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-              <span id="nav-xp">0 XP</span>
-            </span>
-          </div>
-
-          <!-- Sound Toggle Button -->
-          <button id="sound-toggle-btn" onclick="toggleSound()" title="Toggle Sound Effects" class="p-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 transition cursor-pointer">
-            <svg id="sound-icon-on" class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-            <svg id="sound-icon-off" class="w-4 h-4 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
-          </button>
-
-          <!-- User Profile Button -->
-          <button onclick="openProfileModal()" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 transition cursor-pointer">
-            <div id="nav-avatar" class="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-xs font-bold text-white uppercase">
-              U
-            </div>
-            <div class="text-left hidden sm:block">
-              <p id="nav-username" class="text-xs font-semibold text-white leading-tight max-w-[110px] truncate">Student</p>
-              <p id="nav-grade" class="text-[10px] text-slate-400 leading-tight">High School</p>
-            </div>
-          </button>
-
-          <!-- Logout Button -->
-          <button onclick="handleLogout()" title="Sign Out" class="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-400 transition cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-          </button>
-        </div>
-
-      </div>
-    </header>
-
-    <!-- =================================================================== -->
-    <!-- SUB-VIEW A: DASHBOARD & SUBJECT SELECTION                           -->
-    <!-- =================================================================== -->
-    <main id="dashboard-view" class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
-      
-      <!-- Welcome Hero Banner -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
-        <div class="space-y-2 z-10">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-            <span>🔥</span> <span id="dash-streak-badge">1 Day Learning Streak</span>
-          </div>
-          <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white">
-            Welcome back, <span id="dash-welcome-name" class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Learner</span>!
-          </h2>
-          <p class="text-slate-300 text-sm sm:text-base max-w-2xl">
-            Pick a subject below, customize your quiz length (5, 10, or 15 questions), and earn XP to unlock achievement badges.
-          </p>
-        </div>
-
-        <!-- Quick Profile & Badges Trigger -->
-        <div class="flex flex-wrap items-center gap-3 z-10">
-          <button onclick="openProfileModal()" class="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/25 flex items-center gap-2 transition cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            My Profile & Badges
-          </button>
-        </div>
+    <div class="panel auth-card">
+      <div class="brand">📖 EduQuest</div>
+      <div class="tabs">
+        <button id="tab-login" class="active" onclick="switchAuthTab('login')">Login</button>
+        <button id="tab-register" onclick="switchAuthTab('register')">Create Account</button>
       </div>
 
-      <!-- 4 KPI Stat Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass-card rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total XP</span>
-            <span class="p-2 rounded-xl bg-amber-500/15 text-amber-400">⚡</span>
-          </div>
-          <p id="stat-xp" class="font-display text-2xl sm:text-3xl font-extrabold text-white">0</p>
-          <p id="stat-level-sub" class="text-xs text-slate-400 mt-1">Level 1 Explorer</p>
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <label>Email Address</label>
+        <input id="login-email" type="email" required placeholder="student@eduquest.com">
+        <label>Password</label>
+        <input id="login-password" type="password" required placeholder="••••••••">
+        <a href="#" class="forgot" onclick="showForgot(event)">Forgot password?</a>
+        <button type="submit" class="btn primary full">Sign In to Dashboard</button>
+        <div class="divider"><span>Or instant access</span></div>
+        <button type="button" class="btn dark full" onclick="handleDemoLogin()">⚡ Quick Demo Guest Login</button>
+      </form>
+
+      <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+        <label>Full Name</label>
+        <input id="reg-name" type="text" required placeholder="Aarav Sharma">
+        <label>Email Address</label>
+        <input id="reg-email" type="email" required placeholder="aarav@example.com">
+        <div class="two-col">
+          <div><label>Password</label><input id="reg-password" type="password" required minlength="4" placeholder="Min 4 chars"></div>
+          <div><label>Grade / Level</label>
+            <select id="reg-grade">
+              <option>Middle School</option><option selected>High School</option>
+              <option>University</option><option>Lifelong Learner</option>
+            </select></div>
         </div>
+        <button type="submit" class="btn green full">Create Free Account</button>
+      </form>
 
-        <div class="glass-card rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Quizzes Done</span>
-            <span class="p-2 rounded-xl bg-indigo-500/15 text-indigo-400">🎯</span>
-          </div>
-          <p id="stat-quizzes" class="font-display text-2xl sm:text-3xl font-extrabold text-white">0</p>
-          <p class="text-xs text-slate-400 mt-1">Completed sessions</p>
-        </div>
-
-        <div class="glass-card rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Avg. Accuracy</span>
-            <span class="p-2 rounded-xl bg-emerald-500/15 text-emerald-400">📈</span>
-          </div>
-          <p id="stat-accuracy" class="font-display text-2xl sm:text-3xl font-extrabold text-white">0%</p>
-          <p class="text-xs text-slate-400 mt-1">Overall precision</p>
-        </div>
-
-        <div class="glass-card rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Badges Earned</span>
-            <span class="p-2 rounded-xl bg-purple-500/15 text-purple-400">🏆</span>
-          </div>
-          <p id="stat-badges" class="font-display text-2xl sm:text-3xl font-extrabold text-white">0 / 6</p>
-          <p class="text-xs text-slate-400 mt-1">Milestones unlocked</p>
-        </div>
-      </div>
-
-      <!-- Subject Categories Grid -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-display text-xl font-bold text-white">Choose Your Subject Arena</h3>
-          <span class="text-xs text-slate-400">5 Core Disciplines • 105+ Questions</span>
-        </div>
-
-        <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <!-- Dynamically populated by JS -->
-        </div>
-      </div>
-
-    </main>
-
-    <!-- =================================================================== -->
-    <!-- SUB-VIEW B: ACTIVE QUIZ ARENA                                       -->
-    <!-- =================================================================== -->
-    <main id="quiz-view" class="hidden max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 flex-1 flex flex-col justify-center animate-fade-in">
-      
-      <!-- Top Quiz Bar: Exit, Category Name, Timer & Live Score -->
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <button onclick="confirmQuitQuiz()" class="px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-          Quit Quiz
-        </button>
-
-        <div class="flex items-center gap-2">
-          <span id="quiz-category-badge" class="px-3.5 py-1.5 rounded-xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold">
-            Science • Physics
-          </span>
-        </div>
-
-        <div class="flex items-center gap-2.5">
-          <!-- Timer Pill -->
-          <div id="quiz-timer-box" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 flex items-center gap-1.5 text-xs font-bold text-cyan-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span id="quiz-timer-text">30s</span>
-          </div>
-
-          <!-- Live Score Pill -->
-          <div class="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
-            Score: <span id="quiz-live-score">0</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Progress Bar -->
-      <div class="mb-6">
-        <div class="flex justify-between text-xs font-semibold text-slate-400 mb-2">
-          <span>Question <span id="quiz-q-current" class="text-white">1</span> of <span id="quiz-q-total" class="text-white">10</span></span>
-          <span id="quiz-progress-pct">10%</span>
-        </div>
-        <div class="w-full h-2.5 bg-slate-800/90 rounded-full overflow-hidden p-0.5">
-          <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full transition-all duration-300" style="width: 10%"></div>
-        </div>
-      </div>
-
-      <!-- Question Card -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-        <h3 id="quiz-question-text" class="font-display text-xl sm:text-2xl font-bold text-white leading-snug">
-          Loading question...
-        </h3>
-
-        <!-- 4 Multiple Choice Options -->
-        <div id="quiz-options-container" class="grid grid-cols-1 gap-3.5">
-          <!-- Populated dynamically -->
-        </div>
-
-        <!-- Instant Feedback & Explanation Box -->
-        <div id="quiz-feedback-box" class="hidden rounded-2xl p-4 sm:p-5 border transition-all animate-fade-in">
-          <div class="flex items-start gap-3">
-            <div id="quiz-feedback-icon" class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-sm font-bold"></div>
-            <div class="space-y-1">
-              <h4 id="quiz-feedback-title" class="font-bold text-sm sm:text-base"></h4>
-              <p id="quiz-feedback-explanation" class="text-xs sm:text-sm text-slate-300 leading-relaxed"></p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Next Question Button -->
-        <div class="flex justify-end pt-2">
-          <button id="quiz-next-btn" onclick="nextQuestion()" class="hidden px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 flex items-center gap-2 transition cursor-pointer">
-            <span id="quiz-next-btn-label">Next Question</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          </button>
-        </div>
-      </div>
-
-    </main>
-
-    <!-- =================================================================== -->
-    <!-- SUB-VIEW C: POST-QUIZ RESULTS & REVIEW                              -->
-    <!-- =================================================================== -->
-    <main id="results-view" class="hidden max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6 animate-slide-up">
-      
-      <!-- Summary Hero Card -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-8 text-center space-y-6">
-        <div id="result-trophy-badge" class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-4xl shadow-xl shadow-amber-500/25">
-          🏆
-        </div>
-
-        <div class="space-y-1.5">
-          <span id="result-category-label" class="text-xs font-bold uppercase tracking-wider text-indigo-400">Science • Physics</span>
-          <h2 id="result-headline" class="font-display text-3xl sm:text-4xl font-extrabold text-white">Outstanding Performance!</h2>
-          <p id="result-subtext" class="text-slate-300 text-sm sm:text-base">You completed the challenge and earned bonus XP.</p>
-        </div>
-
-        <!-- 4 Result Metrics -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 max-w-2xl mx-auto">
-          <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800">
-            <p class="text-xs text-slate-400 font-medium">Final Score</p>
-            <p id="res-score" class="font-display text-2xl font-extrabold text-white mt-1">8 / 10</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800">
-            <p class="text-xs text-slate-400 font-medium">Accuracy</p>
-            <p id="res-accuracy" class="font-display text-2xl font-extrabold text-emerald-400 mt-1">80%</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800">
-            <p class="text-xs text-slate-400 font-medium">XP Earned</p>
-            <p id="res-xp" class="font-display text-2xl font-extrabold text-amber-400 mt-1">+160 XP</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800">
-            <p class="text-xs text-slate-400 font-medium">Time Taken</p>
-            <p id="res-time" class="font-display text-2xl font-extrabold text-cyan-400 mt-1">1m 14s</p>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
-          <button onclick="replaySameQuiz()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition cursor-pointer">
-            Play Again (New Shuffle)
-          </button>
-          <button onclick="navigateTo('dashboard')" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold text-sm transition cursor-pointer">
-            Back to Subjects
-          </button>
-        </div>
-      </div>
-
-      <!-- Question-by-Question Review Breakdown -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
-        <h3 class="font-display text-lg font-bold text-white">Question-by-Question Review</h3>
-        <div id="results-review-list" class="space-y-3">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
-
-    </main>
-
+      <form id="forgot-form" class="hidden" onsubmit="handleReset(event)">
+        <h3 class="small-title">Reset your password</h3>
+        <label>Registered Email</label>
+        <input id="forgot-email" type="email" required placeholder="student@eduquest.com">
+        <label>New Password</label>
+        <input id="forgot-password" type="password" required minlength="4" placeholder="Min 4 chars">
+        <button type="submit" class="btn primary full">Reset Password</button>
+        <a href="#" class="forgot center" onclick="hideForgot(event)">← Back to login</a>
+      </form>
+    </div>
   </div>
+</section>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 1: QUIZ SETUP (SUB-CATEGORY & QUESTION COUNT SELECTOR)          -->
-  <!-- ===================================================================== -->
-  <div id="setup-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-    <div class="glass-panel rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-6 relative">
-      
-      <button onclick="closeSetupModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+<!-- APP -->
+<div id="app-shell" class="hidden">
+  <header class="topbar panel">
+    <button class="logo" onclick="navigateTo('dashboard')">📖 <b>EduQuest</b></button>
+    <div class="top-right">
+      <div class="xp-pill"><span id="nav-level">Lvl 1</span> ⭐ <span id="nav-xp">0 XP</span></div>
+      <button class="icon-btn" id="sound-btn" onclick="toggleSound()" title="Toggle sound">🔊</button>
+      <button class="icon-btn user-btn" onclick="openProfileModal()">
+        <span id="nav-avatar" class="avatar">U</span>
+        <span class="user-text"><b id="nav-username">Student</b><small id="nav-grade">High School</small></span>
       </button>
-
-      <div class="flex items-center gap-3.5">
-        <div id="setup-icon" class="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-2xl">🔬</div>
-        <div>
-          <h3 id="setup-title" class="font-display text-xl font-bold text-white">Science</h3>
-          <p id="setup-desc" class="text-xs text-slate-400">Customize your session settings</p>
-        </div>
-      </div>
-
-      <!-- Sub-category selector (Only shown for Science) -->
-      <div id="setup-subcategory-section" class="space-y-2.5 hidden">
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Select Science Branch</label>
-        <div class="grid grid-cols-3 gap-2.5">
-          <button type="button" onclick="selectSubcategory('Physics')" data-sub="Physics" class="subcat-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition cursor-pointer">
-            ⚛️ Physics
-          </button>
-          <button type="button" onclick="selectSubcategory('Chemistry')" data-sub="Chemistry" class="subcat-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition cursor-pointer">
-            🧪 Chemistry
-          </button>
-          <button type="button" onclick="selectSubcategory('Biology')" data-sub="Biology" class="subcat-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition cursor-pointer">
-            🧬 Biology
-          </button>
-        </div>
-      </div>
-
-      <!-- Question Count Selector -->
-      <div class="space-y-2.5">
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Number of Questions</label>
-        <div class="grid grid-cols-3 gap-3">
-          <button type="button" onclick="selectQuestionCount(5)" data-count="5" class="qcount-btn p-3.5 rounded-2xl border text-center transition cursor-pointer">
-            <span class="block font-display text-lg font-extrabold text-white">5</span>
-            <span class="text-[11px] text-slate-400">Quick Sprint</span>
-          </button>
-          <button type="button" onclick="selectQuestionCount(10)" data-count="10" class="qcount-btn p-3.5 rounded-2xl border text-center transition cursor-pointer">
-            <span class="block font-display text-lg font-extrabold text-white">10</span>
-            <span class="text-[11px] text-slate-400">Standard</span>
-          </button>
-          <button type="button" onclick="selectQuestionCount(15)" data-count="15" class="qcount-btn p-3.5 rounded-2xl border text-center transition cursor-pointer">
-            <span class="block font-display text-lg font-extrabold text-white">15</span>
-            <span class="text-[11px] text-slate-400">Deep Mastery</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Optional 30s Timer Toggle -->
-      <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800">
-        <div>
-          <p class="text-sm font-semibold text-white">30-Second Question Timer</p>
-          <p class="text-xs text-slate-400">Earn +5 speed bonus XP per fast answer</p>
-        </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input id="setup-timer-toggle" type="checkbox" checked class="sr-only peer">
-          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-        </label>
-      </div>
-
-      <button onclick="startConfiguredQuiz()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold shadow-lg shadow-indigo-600/25 transition cursor-pointer">
-        Launch Quiz Challenge 🚀
-      </button>
+      <button class="icon-btn danger" onclick="handleLogout()" title="Sign out">⏻</button>
     </div>
-  </div>
+  </header>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 2: USER PROFILE, BADGES & QUIZ HISTORY                          -->
-  <!-- ===================================================================== -->
-  <div id="profile-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-    <div class="glass-panel rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden relative">
-      
-      <!-- Modal Header -->
-      <div class="p-6 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center gap-3.5">
-          <div id="prof-avatar" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-lg font-extrabold text-white uppercase">
-            U
-          </div>
-          <div>
-            <h3 id="prof-name" class="font-display text-xl font-bold text-white">Student Name</h3>
-            <p id="prof-meta" class="text-xs text-slate-400">student@email.com • High School</p>
-          </div>
-        </div>
-        <button onclick="closeProfileModal()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+  <main id="dashboard-view" class="container">
+    <div class="panel hero">
+      <div>
+        <span class="pill green-pill">🔥 <span id="dash-streak-badge">1 Day Learning Streak</span></span>
+        <h2>Welcome back, <span id="dash-welcome-name" class="grad">Learner</span>!</h2>
+        <p>Pick a subject below, choose your quiz length (5, 10, or 15 questions), and earn XP to unlock badges.</p>
       </div>
+      <button class="btn primary" onclick="openProfileModal()">My Profile &amp; Badges</button>
+    </div>
 
-      <!-- Modal Scrollable Content -->
-      <div class="p-6 overflow-y-auto space-y-6">
-        
-        <!-- XP Progress Bar to Next Level -->
-        <div class="p-4 rounded-2xl bg-slate-900/75 border border-slate-800 space-y-2">
-          <div class="flex justify-between text-xs font-bold">
-            <span id="prof-level-label" class="text-indigo-400">Level 1</span>
-            <span id="prof-xp-progress-text" class="text-slate-400">0 / 250 XP to Level 2</span>
-          </div>
-          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-            <div id="prof-xp-bar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all" style="width: 0%"></div>
-          </div>
-        </div>
+    <div class="stats">
+      <div class="card"><small>TOTAL XP</small><h3 id="stat-xp">0</h3><em id="stat-level-sub">Level 1</em></div>
+      <div class="card"><small>QUIZZES DONE</small><h3 id="stat-quizzes">0</h3><em>Completed sessions</em></div>
+      <div class="card"><small>AVG. ACCURACY</small><h3 id="stat-accuracy">0%</h3><em>Overall precision</em></div>
+      <div class="card"><small>BADGES EARNED</small><h3 id="stat-badges">0 / 6</h3><em>Milestones unlocked</em></div>
+    </div>
 
-        <!-- Achievement Badges -->
-        <div class="space-y-3">
-          <h4 class="font-display text-sm font-bold uppercase tracking-wider text-slate-300">Achievement Badges</h4>
-          <div id="prof-badges-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
+    <div class="row-between"><h3>Choose Your Subject Arena</h3><small>5 Core Disciplines • 105+ Questions</small></div>
+    <div id="categories-grid" class="cat-grid"></div>
+  </main>
 
-        <!-- Recent Quiz History -->
-        <div class="space-y-3">
-          <h4 class="font-display text-sm font-bold uppercase tracking-wider text-slate-300">Recent Quiz History</h4>
-          <div id="prof-history-list" class="space-y-2.5">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
-
+  <main id="quiz-view" class="container narrow hidden">
+    <div class="row-between wrap">
+      <button class="btn dark sm" onclick="confirmQuitQuiz()">← Quit Quiz</button>
+      <span id="quiz-category-badge" class="pill">Science • Physics</span>
+      <div class="top-right">
+        <span id="quiz-timer-box" class="timer">⏱ <span id="quiz-timer-text">30s</span></span>
+        <span class="pill green-pill">Score: <span id="quiz-live-score">0</span></span>
       </div>
     </div>
+    <div class="progress-info"><span>Question <b id="quiz-q-current">1</b> of <b id="quiz-q-total">10</b></span><span id="quiz-progress-pct">10%</span></div>
+    <div class="bar"><div id="quiz-progress-bar"></div></div>
+
+    <div class="panel q-card">
+      <h3 id="quiz-question-text">Loading question...</h3>
+      <div id="quiz-options-container"></div>
+      <div id="quiz-feedback-box" class="hidden">
+        <b id="quiz-feedback-title"></b>
+        <p id="quiz-feedback-explanation"></p>
+      </div>
+      <div class="right"><button id="quiz-next-btn" class="btn primary hidden" onclick="nextQuestion()">Next Question</button></div>
+    </div>
+  </main>
+
+  <main id="results-view" class="container narrow hidden">
+    <div class="panel result-card">
+      <div id="result-trophy-badge" class="trophy">🏆</div>
+      <small id="result-category-label" class="label-blue">Science • Physics</small>
+      <h2 id="result-headline">Outstanding Mastery!</h2>
+      <p id="result-subtext"></p>
+      <div class="stats four">
+        <div class="card"><small>Final Score</small><h3 id="res-score">0 / 0</h3></div>
+        <div class="card"><small>Accuracy</small><h3 id="res-accuracy" class="c-green">0%</h3></div>
+        <div class="card"><small>XP Earned</small><h3 id="res-xp" class="c-amber">+0 XP</h3></div>
+        <div class="card"><small>Time Taken</small><h3 id="res-time" class="c-cyan">0s</h3></div>
+      </div>
+      <div class="center-row">
+        <button class="btn primary" onclick="startConfiguredQuiz()">Play Again (New Shuffle)</button>
+        <button class="btn dark" onclick="navigateTo('dashboard')">Back to Subjects</button>
+      </div>
+    </div>
+    <div class="panel pad">
+      <h3>Question-by-Question Review</h3>
+      <div id="results-review-list"></div>
+    </div>
+  </main>
+</div>
+
+<!-- SETUP MODAL -->
+<div id="setup-modal" class="modal hidden">
+  <div class="panel modal-box">
+    <button class="close" onclick="closeSetupModal()">✕</button>
+    <div class="modal-head"><span id="setup-icon" class="big-icon">🔬</span>
+      <div><h3 id="setup-title">Science</h3><small id="setup-desc"></small></div></div>
+
+    <div id="setup-subcategory-section" class="hidden">
+      <label>Select Science Branch</label>
+      <div class="three">
+        <button type="button" class="opt subcat-btn" data-sub="Physics" onclick="selectSubcategory('Physics')">⚛️ Physics</button>
+        <button type="button" class="opt subcat-btn" data-sub="Chemistry" onclick="selectSubcategory('Chemistry')">🧪 Chemistry</button>
+        <button type="button" class="opt subcat-btn" data-sub="Biology" onclick="selectSubcategory('Biology')">🧬 Biology</button>
+      </div>
+    </div>
+
+    <label>Number of Questions</label>
+    <div class="three">
+      <button type="button" class="opt qcount-btn" data-count="5" onclick="selectQuestionCount(5)"><b>5</b><small>Quick Sprint</small></button>
+      <button type="button" class="opt qcount-btn" data-count="10" onclick="selectQuestionCount(10)"><b>10</b><small>Standard</small></button>
+      <button type="button" class="opt qcount-btn" data-count="15" onclick="selectQuestionCount(15)"><b>15</b><small>Deep Mastery</small></button>
+    </div>
+
+    <div class="toggle-row">
+      <div><b>30-Second Question Timer</b><small>Earn +5 speed bonus XP per fast answer</small></div>
+      <input id="setup-timer-toggle" type="checkbox" checked>
+    </div>
+    <button class="btn primary full" onclick="startConfiguredQuiz()">Launch Quiz Challenge 🚀</button>
   </div>
-
-  <!-- ===================================================================== -->
-  <!-- JAVASCRIPT APPLICATION LOGIC & 105+ QUESTION BANK                     -->
-  <!-- ===================================================================== -->
-  <script>
-    /**
-     * =========================================================================
-     * 1. SYNTHESIZED WEB AUDIO API SOUND EFFECTS (Zero External Dependencies)
-     * =========================================================================
-     */
-    let soundEnabled = true;
-    let audioCtx = null;
-
-    function playTone(type) {
-      if (!soundEnabled) return;
-      try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        const now = audioCtx.currentTime;
-        if (type === 'correct') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(523.25, now); // C5
-          osc.frequency.setValueAtTime(659.25, now + 0.09); // E5
-          osc.frequency.setValueAtTime(783.99, now + 0.18); // G5
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-          osc.start(now);
-          osc.stop(now + 0.35);
-        } else if (type === 'wrong') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(220, now);
-          osc.frequency.linearRampToValueAtTime(155, now + 0.25);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-          osc.start(now);
-          osc.stop(now + 0.3);
-        } else if (type === 'complete') {
-          osc.type = 'sine';
-          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-            osc.frequency.setValueAtTime(freq, now + idx * 0.1);
-          });
-          gain.gain.setValueAtTime(0.16, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-          osc.start(now);
-          osc.stop(now + 0.55);
-        }
-      } catch (e) {
-        // Ignore audio errors on restricted environments
-      }
-    }
-
-    function toggleSound() {
-      soundEnabled = !soundEnabled;
-      document.getElementById('sound-icon-on').classList.toggle('hidden', !soundEnabled);
-      document.getElementById('sound-icon-off').classList.toggle('hidden', soundEnabled);
-      showToast(soundEnabled ? 'Sound effects enabled' : 'Sound effects muted', 'info');
-    }
-
-    /**
-     * =========================================================================
-     * 2. COMPREHENSIVE QUESTION BANK (15 QUESTIONS PER SUBJECT/SUB-CATEGORY)
-     *    Total: 7 x 15 = 105 Unique Questions with Explanations
-     * =========================================================================
-     */
-    const QUESTION_BANK = {
-      "Science:Physics": [
-        { q: "What is the SI unit of electric current?", options: ["Volt", "Ampere", "Ohm", "Watt"], ans: 1, exp: "The Ampere (A) is the SI base unit of electric current, named after André-Marie Ampère." },
-        { q: "Which law states that for every action, there is an equal and opposite reaction?", options: ["Newton's First Law", "Newton's Second Law", "Newton's Third Law", "Hooke's Law"], ans: 2, exp: "Newton's Third Law of Motion describes action-reaction force pairs acting on two different bodies." },
-        { q: "What is the approximate speed of light in a vacuum?", options: ["300,000 km/s", "150,000 km/s", "3,000 km/s", "30,000 km/s"], ans: 0, exp: "Light travels at approximately 299,792 kilometers per second (about 3 × 10⁸ m/s) in a vacuum." },
-        { q: "Which phenomenon explains why a straw looks bent when placed in a glass of water?", options: ["Reflection", "Diffraction", "Refraction", "Dispersion"], ans: 2, exp: "Refraction occurs when light changes speed and bends as it passes from air into water." },
-        { q: "What type of energy is stored in a stretched rubber band?", options: ["Kinetic Energy", "Elastic Potential Energy", "Thermal Energy", "Chemical Energy"], ans: 1, exp: "Deforming an elastic object stores Elastic Potential Energy, which converts to kinetic energy upon release." },
-        { q: "Which color of visible light has the shortest wavelength?", options: ["Red", "Green", "Yellow", "Violet"], ans: 3, exp: "Violet light has the shortest wavelength (~380–450 nm) and highest frequency in the visible spectrum." },
-        { q: "What instrument is used to measure atmospheric pressure?", options: ["Thermometer", "Barometer", "Anemometer", "Hygrometer"], ans: 1, exp: "A barometer measures atmospheric pressure, helping meteorologists forecast weather changes." },
-        { q: "In which medium does sound travel the fastest?", options: ["Vacuum", "Air", "Water", "Steel"], ans: 3, exp: "Sound waves travel fastest in solids like steel because particles are tightly packed together." },
-        { q: "What is the acceleration due to gravity on Earth's surface?", options: ["9.8 m/s²", "6.4 m/s²", "12.2 m/s²", "1.6 m/s²"], ans: 0, exp: "Standard gravity on Earth is approximately 9.81 m/s² downward." },
-        { q: "Which particle in an atom carries a negative electric charge?", options: ["Proton", "Neutron", "Electron", "Positron"], ans: 2, exp: "Electrons orbit the atomic nucleus and carry a fundamental negative charge (-1)." },
-        { q: "What does a kilowatt-hour (kWh) measure?", options: ["Power", "Electrical Energy", "Electric Charge", "Voltage"], ans: 1, exp: "A kilowatt-hour measures total energy consumed over time (1 kW of power used for 1 hour)." },
-        { q: "Which mirror is commonly used as a rear-view mirror in vehicles?", options: ["Plane Mirror", "Concave Mirror", "Convex Mirror", "Parabolic Mirror"], ans: 2, exp: "Convex mirrors curve outward, providing a wider field of view with upright, diminished images." },
-        { q: "What happens to the resistance of most metal conductors when temperature increases?", options: ["It decreases", "It increases", "It stays constant", "It drops to zero"], ans: 1, exp: "Higher temperature causes metal atoms to vibrate more, impeding electron flow and increasing resistance." },
-        { q: "Who discovered electromagnetic induction in 1831?", options: ["Albert Einstein", "Michael Faraday", "Nikola Tesla", "James Clerk Maxwell"], ans: 1, exp: "Michael Faraday demonstrated that a changing magnetic field induces an electric current." },
-        { q: "What is the SI unit of frequency?", options: ["Joule", "Pascal", "Hertz", "Newton"], ans: 2, exp: "One Hertz (Hz) equals one cycle per second." }
-      ],
-      "Science:Chemistry": [
-        { q: "What is the chemical symbol for Gold?", options: ["Go", "Gd", "Au", "Ag"], ans: 2, exp: "Au comes from 'Aurum', the Latin word for gold." },
-        { q: "Which gas is most abundant in Earth's atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Argon"], ans: 2, exp: "Nitrogen makes up roughly 78% of Earth's atmosphere, while oxygen accounts for about 21%." },
-        { q: "What is the pH value of pure distilled water at 25°C?", options: ["5", "7", "9", "14"], ans: 1, exp: "A pH of 7 is chemically neutral—neither acidic (<7) nor basic (>7)." },
-        { q: "Which element has the atomic number 1?", options: ["Helium", "Oxygen", "Hydrogen", "Carbon"], ans: 2, exp: "Hydrogen is the lightest and first element on the periodic table with 1 proton." },
-        { q: "What is the chemical formula for common table salt?", options: ["KCl", "NaCl", "CaCO₃", "NaOH"], ans: 1, exp: "Table salt is Sodium Chloride (NaCl), an ionic compound of sodium and chlorine." },
-        { q: "Which subatomic particle determines the identity of a chemical element?", options: ["Neutron", "Electron", "Proton", "Photon"], ans: 2, exp: "The number of protons (atomic number) uniquely defines every chemical element." },
-        { q: "What type of chemical bond involves the sharing of electron pairs between atoms?", options: ["Ionic Bond", "Covalent Bond", "Metallic Bond", "Hydrogen Bond"], ans: 1, exp: "Covalent bonds form when non-metal atoms share pairs of valence electrons." },
-        { q: "Which gas turns limewater milky when bubbled through it?", options: ["Oxygen", "Hydrogen", "Carbon Dioxide", "Nitrogen"], ans: 2, exp: "Carbon dioxide reacts with calcium hydroxide (limewater) to form insoluble white calcium carbonate." },
-        { q: "What is the hardest naturally occurring substance on Earth?", options: ["Quartz", "Graphite", "Diamond", "Titanium"], ans: 2, exp: "Diamond is a crystalline allotrope of carbon with a 3D tetrahedral lattice, scoring 10 on the Mohs scale." },
-        { q: "Which acid is present in vinegar?", options: ["Citric Acid", "Acetic Acid", "Sulfuric Acid", "Hydrochloric Acid"], ans: 1, exp: "Vinegar is a dilute aqueous solution of acetic acid (CH₃COOH)." },
-        { q: "What are the vertical columns in the Periodic Table called?", options: ["Periods", "Groups", "Blocks", "Rows"], ans: 1, exp: "Vertical columns are called Groups (or families), and elements in a group share similar chemical properties." },
-        { q: "Which metal is liquid at room temperature?", options: ["Gallium", "Sodium", "Mercury", "Lead"], ans: 2, exp: "Mercury (Hg) is the only metallic element that remains liquid at standard room temperature and pressure." },
-        { q: "What is the process of a solid changing directly into a gas without becoming liquid?", options: ["Condensation", "Evaporation", "Sublimation", "Deposition"], ans: 2, exp: "Dry ice (solid CO₂) and iodine undergo sublimation directly from solid to gas." },
-        { q: "Which noble gas is used to fill party balloons so they float safely?", options: ["Neon", "Argon", "Helium", "Xenon"], ans: 2, exp: "Helium is lighter than air and completely non-flammable, unlike hydrogen." },
-        { q: "What is the main component of natural gas?", options: ["Propane", "Butane", "Methane", "Ethane"], ans: 2, exp: "Natural gas consists primarily of methane (CH₄)." }
-      ],
-      "Science:Biology": [
-        { q: "Which organelle is known as the 'powerhouse of the cell'?", options: ["Ribosome", "Mitochondria", "Golgi Apparatus", "Lysosome"], ans: 1, exp: "Mitochondria generate most of the cell's supply of ATP (adenosine triphosphate) via cellular respiration." },
-        { q: "What pigment gives plants their green color and absorbs light for photosynthesis?", options: ["Carotene", "Melanin", "Chlorophyll", "Hemoglobin"], ans: 2, exp: "Chlorophyll absorbs blue and red light wavelengths and reflects green light." },
-        { q: "Which blood cells are primarily responsible for fighting infections?", options: ["Red Blood Cells", "White Blood Cells", "Platelets", "Plasma Cells"], ans: 1, exp: "White blood cells (leukocytes) defend the body against pathogens and foreign invaders." },
-        { q: "What is the largest organ of the human body?", options: ["Liver", "Brain", "Skin", "Lungs"], ans: 2, exp: "The skin is the body's largest organ, acting as a protective barrier and regulating temperature." },
-        { q: "Which molecule carries genetic instructions in all known living organisms?", options: ["RNA", "DNA", "ATP", "Glucose"], ans: 1, exp: "Deoxyribonucleic acid (DNA) stores hereditary genetic information in a double-helix structure." },
-        { q: "In which part of the human digestive system are most nutrients absorbed?", options: ["Stomach", "Esophagus", "Small Intestine", "Large Intestine"], ans: 2, exp: "The small intestine is lined with tiny finger-like villi that maximize nutrient absorption into the bloodstream." },
-        { q: "Which blood type is known as the universal red blood cell donor?", options: ["AB+", "O-", "A+", "B-"], ans: 1, exp: "Type O-negative red blood cells lack A, B, and Rh antigens, minimizing transfusion reactions." },
-        { q: "What gas do plants absorb from the atmosphere during photosynthesis?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Methane"], ans: 2, exp: "Plants take in carbon dioxide (CO₂) and water to synthesize glucose and release oxygen." },
-        { q: "How many chambers does a healthy human heart have?", options: ["2", "3", "4", "5"], ans: 2, exp: "The human heart has four chambers: right atrium, right ventricle, left atrium, and left ventricle." },
-        { q: "Which vitamin is synthesized by human skin when exposed to sunlight?", options: ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin K"], ans: 2, exp: "UVB rays trigger the synthesis of Vitamin D, essential for calcium absorption and bone health." },
-        { q: "What is the basic structural and functional unit of the nervous system?", options: ["Nephron", "Neuron", "Alveolus", "Osteocyte"], ans: 1, exp: "Neurons transmit electrical and chemical signals throughout the brain and body." },
-        { q: "Which part of the brain controls balance, posture, and motor coordination?", options: ["Cerebrum", "Cerebellum", "Medulla", "Hypothalamus"], ans: 1, exp: "The cerebellum ('little brain') at the back of the skull coordinates voluntary movement and balance." },
-        { q: "What is the process of cell division that produces two identical daughter cells?", options: ["Meiosis", "Mitosis", "Binary Fission", "Osmosis"], ans: 1, exp: "Mitosis enables growth and tissue repair by creating genetically identical somatic cells." },
-        { q: "Which blood vessels carry oxygen-rich blood away from the heart?", options: ["Veins", "Capillaries", "Arteries", "Venules"], ans: 2, exp: "Arteries (except the pulmonary artery) carry oxygenated blood under high pressure away from the heart." },
-        { q: "What is the scientific study of fungi called?", options: ["Botany", "Mycology", "Zoology", "Virology"], ans: 1, exp: "Mycology is the branch of biology concerned with the study of fungi, including mushrooms and yeasts." }
-      ],
-      "Mathematics": [
-        { q: "What is the value of π (Pi) rounded to two decimal places?", options: ["3.12", "3.14", "3.16", "3.18"], ans: 1, exp: "Pi (π ≈ 3.14159...) is the ratio of a circle's circumference to its diameter." },
-        { q: "Solve for x: 3x + 7 = 22", options: ["3", "4", "5", "6"], ans: 2, exp: "Subtract 7 from both sides (3x = 15), then divide by 3 to get x = 5." },
-        { q: "What is the sum of the interior angles of any triangle?", options: ["90°", "180°", "270°", "360°"], ans: 1, exp: "In Euclidean geometry, the three interior angles of a triangle always add up to 180°." },
-        { q: "Which of the following is the smallest prime number?", options: ["0", "1", "2", "3"], ans: 2, exp: "2 is the smallest prime number and the only even prime number." },
-        { q: "What is 15% of 200?", options: ["20", "25", "30", "35"], ans: 2, exp: "10% of 200 is 20, and 5% is 10; 20 + 10 = 30." },
-        { q: "What is the square root of 144?", options: ["11", "12", "13", "14"], ans: 1, exp: "12 × 12 = 144, so √144 = 12." },
-        { q: "How many sides does a regular hexagon have?", options: ["5", "6", "7", "8"], ans: 1, exp: "A hexagon is a six-sided polygon ('hex' means six in Greek)." },
-        { q: "If a rectangle has a length of 8 cm and a width of 5 cm, what is its area?", options: ["13 cm²", "26 cm²", "40 cm²", "45 cm²"], ans: 2, exp: "Area of a rectangle = length × width = 8 × 5 = 40 cm²." },
-        { q: "What is 2⁵ (2 raised to the power of 5)?", options: ["10", "16", "32", "64"], ans: 2, exp: "2 × 2 × 2 × 2 × 2 = 32." },
-        { q: "In a right-angled triangle, if the two legs are 3 and 4, what is the hypotenuse?", options: ["5", "6", "7", "8"], ans: 0, exp: "By the Pythagorean theorem: √(3² + 4²) = √(9 + 16) = √25 = 5." },
-        { q: "What is the next number in the Fibonacci sequence: 1, 1, 2, 3, 5, 8, ...?", options: ["11", "12", "13", "15"], ans: 2, exp: "Each number is the sum of the two preceding ones: 5 + 8 = 13." },
-        { q: "What is the probability of flipping a fair coin and getting heads twice in a row?", options: ["1/2", "1/3", "1/4", "1/8"], ans: 2, exp: "(1/2) × (1/2) = 1/4 (or 25%)." },
-        { q: "What is the median of the data set: {4, 9, 2, 7, 5}?", options: ["4", "5", "7", "9"], ans: 1, exp: "Sorted in order: {2, 4, 5, 7, 9}. The middle value is 5." },
-        { q: "What is the value of 0! (zero factorial)?", options: ["0", "1", "Undefined", "Infinity"], ans: 1, exp: "By mathematical convention in combinatorics, 0! is defined as 1." },
-        { q: "Convert the fraction 3/4 into a percentage.", options: ["65%", "70%", "75%", "80%"], ans: 2, exp: "3 ÷ 4 = 0.75, which equals 75%." }
-      ],
-      "Social Science": [
-        { q: "Which ancient civilization built the Machu Picchu citadel in the Andes Mountains?", options: ["Aztec", "Maya", "Inca", "Olmec"], ans: 2, exp: "Machu Picchu was built in the 15th century by the Inca Empire in modern-day Peru." },
-        { q: "Who was the primary author of the United States Declaration of Independence?", options: ["George Washington", "Thomas Jefferson", "Benjamin Franklin", "John Adams"], ans: 1, exp: "Thomas Jefferson drafted the Declaration of Independence in June 1776." },
-        { q: "Which river was the lifeblood of Ancient Egyptian civilization?", options: ["Tigris", "Euphrates", "Nile", "Indus"], ans: 2, exp: "Annual flooding of the Nile deposited fertile silt that sustained Ancient Egypt's agriculture." },
-        { q: "In which year did World War II officially end?", options: ["1943", "1944", "1945", "1946"], ans: 2, exp: "World War II ended in 1945 following the surrenders of Germany in May and Japan in September." },
-        { q: "What is the imaginary line at 0° latitude that divides Earth into Northern and Southern Hemispheres?", options: ["Prime Meridian", "Equator", "Tropic of Cancer", "International Date Line"], ans: 1, exp: "The Equator circles Earth at 0° latitude equidistant from the North and South Poles." },
-        { q: "Which economic system is characterized by private ownership and free-market competition?", options: ["Feudalism", "Capitalism", "Command Economy", "Barter System"], ans: 1, exp: "Capitalism relies on private property rights, voluntary exchange, and market-driven pricing." },
-        { q: "Who led India's non-violent independence movement against British rule?", options: ["Subhas Chandra Bose", "Mahatma Gandhi", "B.R. Ambedkar", "Sardar Patel"], ans: 1, exp: "Mahatma Gandhi championed Satyagraha (non-violent civil resistance) to achieve independence." },
-        { q: "Which European city is widely considered the birthplace of the Renaissance?", options: ["Paris", "Florence", "London", "Vienna"], ans: 1, exp: "Florence, Italy sparked the 14th-century cultural rebirth in art, science, and humanism." },
-        { q: "What is the highest mountain range in the world?", options: ["Andes", "Rockies", "Himalayas", "Alps"], ans: 2, exp: "The Himalayas in Asia contain Earth's highest peaks, including Mount Everest." },
-        { q: "Which document signed in 1215 limited the power of the English monarch?", options: ["Bill of Rights", "Magna Carta", "Treaty of Versailles", "Code of Hammurabi"], ans: 1, exp: "King John signed the Magna Carta in 1215, establishing that even the king was subject to the law." },
-        { q: "What does GDP stand for in economics?", options: ["Global Development Plan", "Gross Domestic Product", "General Debt Percentage", "Government Distribution Policy"], ans: 1, exp: "Gross Domestic Product measures the total monetary value of all finished goods and services produced within a country." },
-        { q: "Which ocean is the largest and deepest on Earth?", options: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"], ans: 2, exp: "The Pacific Ocean covers more than 30% of Earth's surface and contains the Mariana Trench." },
-        { q: "In a democracy, what is the principle of 'Separation of Powers'?", options: ["Dividing land among states", "Splitting government into legislative, executive, and judicial branches", "Separating church and trade", "Limiting voting to one party"], ans: 1, exp: "Separation of powers creates checks and balances so no single branch holds absolute authority." },
-        { q: "Which ancient trade network connected East Asia with the Mediterranean world?", options: ["Amber Road", "Silk Road", "Spice Route", "Trans-Saharan Trail"], ans: 1, exp: "The Silk Road facilitated trade in silk, spices, paper, and cultural ideas across Eurasia." },
-        { q: "Which continent has the largest population in the world?", options: ["Africa", "Europe", "Asia", "North America"], ans: 2, exp: "Asia is home to roughly 60% of the world's human population." }
-      ],
-      "General Knowledge": [
-        { q: "Which planet in our Solar System is famous for its prominent ring system?", options: ["Mars", "Saturn", "Venus", "Mercury"], ans: 1, exp: "Saturn's spectacular rings are composed mostly of ice particles, rocky debris, and dust." },
-        { q: "Who painted the 'Mona Lisa'?", options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"], ans: 2, exp: "Leonardo da Vinci painted the Mona Lisa in the early 16th century; it hangs in the Louvre." },
-        { q: "What is the capital city of Japan?", options: ["Kyoto", "Osaka", "Tokyo", "Seoul"], ans: 2, exp: "Tokyo has served as Japan's capital since 1868 and is the world's most populous metropolitan area." },
-        { q: "Which mammal is capable of true sustained flight?", options: ["Flying Squirrel", "Bat", "Sugar Glider", "Colugo"], ans: 1, exp: "Bats are the only mammals capable of true, sustained powered flight." },
-        { q: "How many continents are there on Earth according to the standard seven-continent model?", options: ["5", "6", "7", "8"], ans: 2, exp: "The seven continents are Asia, Africa, North America, South America, Antarctica, Europe, and Australia." },
-        { q: "Which language has the most native speakers worldwide?", options: ["English", "Spanish", "Mandarin Chinese", "Hindi"], ans: 2, exp: "Mandarin Chinese has over 900 million native speakers, making it #1 by native speaker count." },
-        { q: "What is the hardest natural gemstone?", options: ["Ruby", "Sapphire", "Emerald", "Diamond"], ans: 3, exp: "Diamonds top the Mohs hardness scale at 10." },
-        { q: "Which country gifted the Statue of Liberty to the United States?", options: ["United Kingdom", "France", "Spain", "Italy"], ans: 1, exp: "France gifted the Statue of Liberty in 1886 to celebrate friendship and shared democratic ideals." },
-        { q: "What is the currency of the United Kingdom?", options: ["Euro", "Dollar", "Pound Sterling", "Franc"], ans: 2, exp: "The Pound Sterling (£ / GBP) is the official currency of the UK." },
-        { q: "Which planet is closest to the Sun?", options: ["Venus", "Mercury", "Earth", "Mars"], ans: 1, exp: "Mercury orbits closest to the Sun at an average distance of 58 million km." },
-        { q: "Who wrote the play 'Romeo and Juliet'?", options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"], ans: 1, exp: "William Shakespeare wrote this famous tragedy in the late 16th century." },
-        { q: "What is the tallest animal in the world?", options: ["African Elephant", "Giraffe", "Ostrich", "Blue Whale"], ans: 1, exp: "Adult giraffes can reach heights of up to 5.5 meters (18 feet)." },
-        { q: "Which invention is Alexander Graham Bell best known for patenting in 1876?", options: ["Light Bulb", "Telephone", "Radio", "Television"], ans: 1, exp: "Alexander Graham Bell was awarded the first US patent for the electric telephone." },
-        { q: "Which ocean lies between Europe/Africa and the Americas?", options: ["Indian Ocean", "Pacific Ocean", "Atlantic Ocean", "Southern Ocean"], ans: 2, exp: "The Atlantic Ocean separates the Old World from the New World." },
-        { q: "How many players are on a standard soccer (football) team on the field?", options: ["9", "10", "11", "12"], ans: 2, exp: "Each soccer team fields 11 players, including 1 goalkeeper." }
-      ],
-      "Good & Bad Habits": [
-        { q: "How many hours of sleep per night do health experts generally recommend for teenagers and students?", options: ["4–5 hours", "5–6 hours", "8–10 hours", "12–14 hours"], ans: 2, exp: "8–10 hours of quality sleep supports memory consolidation, focus, and immune health." },
-        { q: "Which habit helps prevent eye strain when studying on a computer screen (the 20-20-20 rule)?", options: ["Look 20 feet away for 20 seconds every 20 minutes", "Blink 20 times every 20 hours", "Keep screen brightness at 20%", "Sit 20 inches from a dark wall"], ans: 0, exp: "Looking 20 feet away for 20 seconds every 20 minutes relaxes the eye's focusing muscles." },
-        { q: "Why is drinking water regularly throughout the day a great habit?", options: ["It replaces all meals", "It supports brain focus, energy, and digestion", "It eliminates the need for sleep", "It stops muscle growth"], ans: 1, exp: "Even mild dehydration can impair concentration, mood, and physical stamina." },
-        { q: "Which of the following is considered a BAD study habit?", options: ["Taking short 5-minute breaks", "Cramming all night without sleep before an exam", "Summarizing notes in your own words", "Testing yourself with practice quizzes"], ans: 1, exp: "All-night cramming impairs memory recall; spaced repetition and sleep are far more effective." },
-        { q: "What is the recommended minimum daily physical activity for youth and young adults?", options: ["10 minutes", "30–60 minutes", "4 hours", "Only once a month"], ans: 1, exp: "At least 30–60 minutes of moderate-to-vigorous movement boosts cardiovascular and mental health." },
-        { q: "Why should you avoid using smartphones right before going to sleep?", options: ["Phones get heavier at night", "Blue light suppresses melatonin and delays deep sleep", "Wi-Fi drains oxygen", "It makes alarms louder"], ans: 1, exp: "Screen blue light tricks the brain into thinking it's daytime, reducing sleep-inducing melatonin." },
-        { q: "Which habit demonstrates strong digital citizenship and online safety?", options: ["Using the same password everywhere", "Sharing personal addresses publicly", "Using strong unique passwords and two-factor authentication", "Clicking unknown links in spam emails"], ans: 2, exp: "Unique passwords and 2FA protect your accounts from unauthorized access." },
-        { q: "What is a positive habit when you make a mistake or fail a test?", options: ["Blaming others and quitting", "Analyzing what went wrong and adjusting your study plan", "Hiding your grades forever", "Never trying that subject again"], ans: 1, exp: "A growth mindset treats mistakes as feedback for improvement rather than permanent failure." },
-        { q: "How does eating a balanced breakfast benefit students?", options: ["It causes afternoon fatigue", "It stabilizes blood sugar and improves morning attention", "It slows down metabolism", "It replaces hydration"], ans: 1, exp: "Complex carbs, protein, and healthy fats fuel the brain for sustained classroom focus." },
-        { q: "Which habit helps reduce chronic stress and anxiety?", options: ["Bottling up all emotions", "Deep breathing, mindfulness, and talking to trusted people", "Drinking excessive energy drinks", "Skipping meals"], ans: 1, exp: "Mindful breathing activates the parasympathetic nervous system, lowering stress hormones." },
-        { q: "Why is slouching over a desk for hours considered a bad physical habit?", options: ["It makes you taller", "It strains the spine, neck, and shoulders", "It improves lung capacity", "It strengthens core muscles"], ans: 1, exp: "Good ergonomic posture protects spinal alignment and prevents chronic back and neck pain." },
-        { q: "What is the 'Pomodoro Technique' in time management?", options: ["Studying for 6 hours straight", "25 minutes of focused work followed by a 5-minute break", "Multitasking with TV and homework", "Only studying on weekends"], ans: 1, exp: "Short, timed focus sprints prevent mental fatigue and beat procrastination." },
-        { q: "Why is brushing teeth twice daily and flossing an essential habit?", options: ["It whitens hair", "It prevents cavities, gum disease, and supports heart health", "It replaces dental checkups", "It cures colds"], ans: 1, exp: "Oral hygiene removes plaque bacteria that cause tooth decay and systemic inflammation." },
-        { q: "Which habit builds strong, respectful friendships?", options: ["Interrupting others constantly", "Active listening and empathy", "Spreading rumors", "Ignoring boundaries"], ans: 1, exp: "Active listening shows respect and builds trust in personal and team relationships." },
-        { q: "What happens when you consistently practice gratitude (e.g., noting 3 good things daily)?", options: ["It lowers optimism", "It improves mood, resilience, and overall well-being", "It causes memory loss", "It reduces sleep quality"], ans: 1, exp: "Psychological research shows regular gratitude journaling boosts happiness and emotional resilience." }
-      ]
-    };
-
-    /**
-     * =========================================================================
-     * 3. SUBJECT METADATA & ACHIEVEMENT BADGES DEFINITION
-     * =========================================================================
-     */
-    const CATEGORIES = [
-      {
-        id: "Science",
-        title: "Science",
-        icon: "🔬",
-        color: "from-indigo-500 to-blue-600",
-        badgeBg: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
-        desc: "Explore the laws of the universe across Physics, Chemistry, and Biology.",
-        hasSubcategories: true,
-        questionCountLabel: "45 Questions (3 Branches)"
-      },
-      {
-        id: "Mathematics",
-        title: "Mathematics",
-        icon: "📐",
-        color: "from-emerald-500 to-teal-600",
-        badgeBg: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-        desc: "Sharpen your logic with algebra, geometry, probability, and number theory.",
-        hasSubcategories: false,
-        questionCountLabel: "15 Questions"
-      },
-      {
-        id: "Social Science",
-        title: "Social Science",
-        icon: "🌍",
-        color: "from-amber-500 to-orange-600",
-        badgeBg: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-        desc: "Journey through world history, civics, economics, and global geography.",
-        hasSubcategories: false,
-        questionCountLabel: "15 Questions"
-      },
-      {
-        id: "General Knowledge",
-        title: "General Knowledge",
-        icon: "💡",
-        color: "from-purple-500 to-pink-600",
-        badgeBg: "bg-purple-500/15 text-purple-300 border-purple-500/30",
-        desc: "Test your awareness of world landmarks, art, astronomy, and discoveries.",
-        hasSubcategories: false,
-        questionCountLabel: "15 Questions"
-      },
-      {
-        id: "Good & Bad Habits",
-        title: "Good & Bad Habits",
-        icon: "🌱",
-        color: "from-cyan-500 to-sky-600",
-        badgeBg: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
-        desc: "Master healthy routines, study techniques, digital safety, and wellness.",
-        hasSubcategories: false,
-        questionCountLabel: "15 Questions"
-      }
-    ];
-
-    const ACHIEVEMENTS = [
-      { id: "first_quiz", icon: "🎯", title: "First Steps", desc: "Complete your first quiz", check: (u) => u.history.length >= 1 },
-      { id: "xp_250", icon: "⚡", title: "Rising Scholar", desc: "Earn 250+ Total XP", check: (u) => u.xp >= 250 },
-      { id: "xp_1000", icon: "👑", title: "Grand Master", desc: "Earn 1,000+ Total XP", check: (u) => u.xp >= 1000 },
-      { id: "perfect_score", icon: "💎", title: "Flawless Victory", desc: "Score 100% on any quiz", check: (u) => u.history.some(h => h.accuracy === 100) },
-      { id: "marathon_15", icon: "🔥", title: "Deep Diver", desc: "Complete a 15-question quiz", check: (u) => u.history.some(h => h.total >= 15) },
-      { id: "all_rounder", icon: "🌈", title: "Polymath", desc: "Play 3 different subjects", check: (u) => new Set(u.history.map(h => h.category.split(':')[0])).size >= 3 }
-    ];
-
-    /**
-     * =========================================================================
-     * 4. LOCALSTORAGE STATE & AUTHENTICATION MANAGEMENT
-     * =========================================================================
-     */
-    const STORAGE_USERS_KEY = 'eduquest_users_v2';
-    const STORAGE_SESSION_KEY = 'eduquest_active_email_v2';
-
-    let currentUser = null;
-
-    // Quiz Setup & Runtime State
-    let setupState = {
-      category: 'Science',
-      subcategory: 'Physics',
-      count: 10,
-      useTimer: true
-    };
-
-    let activeQuiz = {
-      bankKey: '',
-      displayTitle: '',
-      questions: [],
-      currentIndex: 0,
-      score: 0,
-      xpEarned: 0,
-      answered: false,
-      timerInterval: null,
-      timeLeft: 30,
-      startTime: 0,
-      reviewLog: []
-    };
-
-    function getUsersDB() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_USERS_KEY)) || {};
-      } catch {
-        return {};
-      }
-    }
-
-    function saveUsersDB(db) {
-      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(db));
-    }
-
-    function persistCurrentUser() {
-      if (!currentUser) return;
-      const db = getUsersDB();
-      db[currentUser.email] = currentUser;
-      saveUsersDB(db);
-    }
-
-    // Switch between Login and Create Account tabs
-    function switchAuthTab(tab) {
-      const loginForm = document.getElementById('login-form');
-      const regForm = document.getElementById('register-form');
-      const tabLogin = document.getElementById('tab-login');
-      const tabReg = document.getElementById('tab-register');
-
-      if (tab === 'login') {
-        loginForm.classList.remove('hidden');
-        regForm.classList.add('hidden');
-        tabLogin.className = "py-2.5 text-sm font-semibold rounded-xl transition-all bg-indigo-600 text-white shadow-md cursor-pointer";
-        tabReg.className = "py-2.5 text-sm font-semibold rounded-xl transition-all text-slate-400 hover:text-white cursor-pointer";
-      } else {
-        loginForm.classList.add('hidden');
-        regForm.classList.remove('hidden');
-        tabReg.className = "py-2.5 text-sm font-semibold rounded-xl transition-all bg-emerald-600 text-white shadow-md cursor-pointer";
-        tabLogin.className = "py-2.5 text-sm font-semibold rounded-xl transition-all text-slate-400 hover:text-white cursor-pointer";
-      }
-    }
-
-    function handleRegister(e) {
-      e.preventDefault();
-      const name = document.getElementById('reg-name').value.trim();
-      const email = document.getElementById('reg-email').value.trim().toLowerCase();
-      const password = document.getElementById('reg-password').value;
-      const grade = document.getElementById('reg-grade').value;
-
-      if (!name || !email || !password) {
-        showToast('Please fill in all fields.', 'error');
-        return;
-      }
-
-      const db = getUsersDB();
-      if (db[email]) {
-        showToast('An account with this email already exists. Please log in.', 'error');
-        switchAuthTab('login');
-        document.getElementById('login-email').value = email;
-        return;
-      }
-
-      const newUser = {
-        name,
-        email,
-        password,
-        grade,
-        xp: 0,
-        streak: 1,
-        lastActiveDate: new Date().toDateString(),
-        history: []
-      };
-
-      db[email] = newUser;
-      saveUsersDB(db);
-      loginUserSession(newUser);
-      showToast(`Welcome to EduQuest, ${name}! Account created.`, 'success');
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value.trim().toLowerCase();
-      const password = document.getElementById('login-password').value;
-
-      const db = getUsersDB();
-      const user = db[email];
-
-      if (!user || user.password !== password) {
-        showToast('Invalid email or password. Try creating an account or use Guest Login.', 'error');
-        return;
-      }
-
-      updateDailyStreak(user);
-      loginUserSession(user);
-      showToast(`Welcome back, ${user.name}!`, 'success');
-    }
-
-    function handleDemoLogin() {
-      const db = getUsersDB();
-      const demoEmail = 'guest@eduquest.demo';
-      if (!db[demoEmail]) {
-        db[demoEmail] = {
-          name: 'Alex Explorer',
-          email: demoEmail,
-          password: 'demo',
-          grade: 'High School',
-          xp: 180,
-          streak: 3,
-          lastActiveDate: new Date().toDateString(),
-          history: [
-            { category: 'Science:Physics', title: 'Science • Physics', score: 4, total: 5, accuracy: 80, xp: 90, date: 'Yesterday' }
-          ]
-        };
-        saveUsersDB(db);
-      }
-      loginUserSession(db[demoEmail]);
-      showToast('Signed in as Demo Guest!', 'success');
-    }
-
-    function updateDailyStreak(user) {
-      const today = new Date().toDateString();
-      if (user.lastActiveDate !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toDateString();
-        user.streak = (user.lastActiveDate === yesterday) ? (user.streak || 0) + 1 : 1;
-        user.lastActiveDate = today;
-      }
-    }
-
-    function loginUserSession(user) {
-      currentUser = user;
-      localStorage.setItem(STORAGE_SESSION_KEY, user.email);
-      persistCurrentUser();
-
-      document.getElementById('auth-view').classList.add('hidden');
-      document.getElementById('app-shell').classList.remove('hidden');
-      navigateTo('dashboard');
-      refreshDashboardUI();
-    }
-
-    function handleLogout() {
-      clearInterval(activeQuiz.timerInterval);
-      currentUser = null;
-      localStorage.removeItem(STORAGE_SESSION_KEY);
-      document.getElementById('app-shell').classList.add('hidden');
-      document.getElementById('auth-view').classList.remove('hidden');
-      showToast('Signed out successfully.', 'info');
-    }
-
-    /**
-     * =========================================================================
-     * 5. NAVIGATION & DASHBOARD UI RENDERING
-     * =========================================================================
-     */
-    function navigateTo(view) {
-      clearInterval(activeQuiz.timerInterval);
-      document.getElementById('dashboard-view').classList.add('hidden');
-      document.getElementById('quiz-view').classList.add('hidden');
-      document.getElementById('results-view').classList.add('hidden');
-
-      if (view === 'dashboard') {
-        document.getElementById('dashboard-view').classList.remove('hidden');
-        refreshDashboardUI();
-      } else if (view === 'quiz') {
-        document.getElementById('quiz-view').classList.remove('hidden');
-      } else if (view === 'results') {
-        document.getElementById('results-view').classList.remove('hidden');
-      }
-    }
-
-    function calculateLevel(xp) {
-      return Math.floor(xp / 250) + 1;
-    }
-
-    function refreshDashboardUI() {
-      if (!currentUser) return;
-
-      const level = calculateLevel(currentUser.xp);
-      const totalQuizzes = currentUser.history.length;
-      const avgAcc = totalQuizzes > 0
-        ? Math.round(currentUser.history.reduce((acc, h) => acc + h.accuracy, 0) / totalQuizzes)
-        : 0;
-      const unlockedBadges = ACHIEVEMENTS.filter(a => a.check(currentUser)).length;
-
-      // Top Navbar
-      document.getElementById('nav-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
-      document.getElementById('nav-username').textContent = currentUser.name;
-      document.getElementById('nav-grade').textContent = currentUser.grade;
-      document.getElementById('nav-level').textContent = `Lvl ${level}`;
-      document.getElementById('nav-xp').textContent = `${currentUser.xp} XP`;
-
-      // Welcome Banner & Stats
-      document.getElementById('dash-welcome-name').textContent = currentUser.name.split(' ')[0];
-      document.getElementById('dash-streak-badge').textContent = `${currentUser.streak || 1} Day Learning Streak`;
-      document.getElementById('stat-xp').textContent = currentUser.xp.toLocaleString();
-      document.getElementById('stat-level-sub').textContent = `Level ${level} Scholar`;
-      document.getElementById('stat-quizzes').textContent = totalQuizzes;
-      document.getElementById('stat-accuracy').textContent = `${avgAcc}%`;
-      document.getElementById('stat-badges').textContent = `${unlockedBadges} / ${ACHIEVEMENTS.length}`;
-
-      // Render Category Cards
-      const grid = document.getElementById('categories-grid');
-      grid.innerHTML = CATEGORIES.map(cat => `
-        <div onclick="openSetupModal('${cat.id}')" class="glass-card rounded-3xl p-6 cursor-pointer flex flex-col justify-between group">
-          <div class="space-y-4">
-            <div class="flex items-start justify-between">
-              <div class="w-13 h-13 p-3 rounded-2xl bg-gradient-to-br ${cat.color} text-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition">
-                ${cat.icon}
-              </div>
-              <span class="px-3 py-1 rounded-full text-[11px] font-semibold border ${cat.badgeBg}">
-                ${cat.questionCountLabel}
-              </span>
-            </div>
-
-            <div>
-              <h4 class="font-display text-xl font-bold text-white group-hover:text-indigo-300 transition">${cat.title}</h4>
-              <p class="text-xs sm:text-sm text-slate-400 mt-1.5 leading-relaxed">${cat.desc}</p>
-            </div>
-          </div>
-
-          <div class="pt-5 mt-5 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
-            <span>${cat.hasSubcategories ? 'Physics • Chemistry • Biology' : '5, 10, or 15 Questions'}</span>
-            <span class="flex items-center gap-1 group-hover:translate-x-1 transition">
-              Start
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    /**
-     * =========================================================================
-     * 6. QUIZ SETUP MODAL LOGIC
-     * =========================================================================
-     */
-    function openSetupModal(categoryId) {
-      const cat = CATEGORIES.find(c => c.id === categoryId);
-      if (!cat) return;
-
-      setupState.category = categoryId;
-      document.getElementById('setup-icon').textContent = cat.icon;
-      document.getElementById('setup-title').textContent = cat.title;
-      document.getElementById('setup-desc').textContent = cat.desc;
-
-      const subSec = document.getElementById('setup-subcategory-section');
-      if (cat.hasSubcategories) {
-        subSec.classList.remove('hidden');
-        selectSubcategory(setupState.subcategory || 'Physics');
-      } else {
-        subSec.classList.add('hidden');
-      }
-
-      selectQuestionCount(setupState.count || 10);
-      document.getElementById('setup-modal').classList.remove('hidden');
-    }
-
-    function closeSetupModal() {
-      document.getElementById('setup-modal').classList.add('hidden');
-    }
-
-    function selectSubcategory(sub) {
-      setupState.subcategory = sub;
-      document.querySelectorAll('.subcat-btn').forEach(btn => {
-        const isSelected = btn.getAttribute('data-sub') === sub;
-        btn.className = isSelected
-          ? "subcat-btn py-2.5 px-3 rounded-xl border border-indigo-500 bg-indigo-600/25 text-white text-xs font-bold transition cursor-pointer"
-          : "subcat-btn py-2.5 px-3 rounded-xl border border-slate-700/80 bg-slate-900/70 text-slate-400 hover:text-white text-xs font-bold transition cursor-pointer";
-      });
-    }
-
-    function selectQuestionCount(count) {
-      setupState.count = count;
-      document.querySelectorAll('.qcount-btn').forEach(btn => {
-        const isSelected = Number(btn.getAttribute('data-count')) === count;
-        btn.className = isSelected
-          ? "qcount-btn p-3.5 rounded-2xl border-2 border-indigo-500 bg-indigo-600/20 text-center transition cursor-pointer"
-          : "qcount-btn p-3.5 rounded-2xl border border-slate-700/80 bg-slate-900/70 hover:border-slate-600 text-center transition cursor-pointer";
-      });
-    }
-
-    /**
-     * =========================================================================
-     * 7. INTERACTIVE QUIZ ENGINE (SHUFFLE, TIMER, FEEDBACK, SCORING)
-     * =========================================================================
-     */
-    function shuffleArray(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
-
-    function startConfiguredQuiz() {
-      setupState.useTimer = document.getElementById('setup-timer-toggle').checked;
-      closeSetupModal();
-
-      const isScience = setupState.category === 'Science';
-      const bankKey = isScience ? `Science:${setupState.subcategory}` : setupState.category;
-      const displayTitle = isScience ? `Science • ${setupState.subcategory}` : setupState.category;
-
-      const pool = QUESTION_BANK[bankKey] || [];
-      const selectedQuestions = shuffleArray(pool).slice(0, Math.min(setupState.count, pool.length));
-
-      activeQuiz = {
-        bankKey,
-        displayTitle,
-        questions: selectedQuestions,
-        currentIndex: 0,
-        score: 0,
-        xpEarned: 0,
-        answered: false,
-        timerInterval: null,
-        timeLeft: 30,
-        startTime: Date.now(),
-        reviewLog: []
-      };
-
-      document.getElementById('quiz-category-badge').textContent = displayTitle;
-      document.getElementById('quiz-q-total').textContent = selectedQuestions.length;
-      document.getElementById('quiz-timer-box').classList.toggle('hidden', !setupState.useTimer);
-
-      navigateTo('quiz');
-      renderCurrentQuestion();
-    }
-
-    function renderCurrentQuestion() {
-      clearInterval(activeQuiz.timerInterval);
-      activeQuiz.answered = false;
-
-      const idx = activeQuiz.currentIndex;
-      const total = activeQuiz.questions.length;
-      const qObj = activeQuiz.questions[idx];
-
-      // Update progress & live stats
-      document.getElementById('quiz-q-current').textContent = idx + 1;
-      document.getElementById('quiz-live-score').textContent = activeQuiz.score;
-      const pct = Math.round(((idx) / total) * 100);
-      document.getElementById('quiz-progress-pct').textContent = `${pct}%`;
-      document.getElementById('quiz-progress-bar').style.width = `${Math.max(6, pct)}%`;
-
-      document.getElementById('quiz-question-text').textContent = qObj.q;
-
-      // Hide feedback & next button
-      document.getElementById('quiz-feedback-box').classList.add('hidden');
-      document.getElementById('quiz-next-btn').classList.add('hidden');
-
-      // Render 4 options
-      const letters = ['A', 'B', 'C', 'D'];
-      const container = document.getElementById('quiz-options-container');
-      container.innerHTML = qObj.options.map((opt, i) => `
-        <button type="button" onclick="submitAnswer(${i})" data-opt="${i}" class="quiz-opt-btn w-full p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-700/80 hover:border-indigo-500/60 text-left flex items-center gap-3.5 transition group cursor-pointer">
-          <span class="w-8 h-8 rounded-xl bg-slate-800 group-hover:bg-indigo-600/30 border border-slate-700 group-hover:border-indigo-400/50 flex items-center justify-center text-xs font-bold text-slate-300 group-hover:text-white shrink-0 transition">
-            ${letters[i]}
-          </span>
-          <span class="text-sm sm:text-base font-medium text-slate-100">${opt}</span>
-        </button>
-      `).join('');
-
-      // Start 30-second countdown if enabled
-      if (setupState.useTimer) {
-        activeQuiz.timeLeft = 30;
-        updateTimerDisplay();
-        activeQuiz.timerInterval = setInterval(() => {
-          activeQuiz.timeLeft--;
-          updateTimerDisplay();
-          if (activeQuiz.timeLeft <= 0) {
-            clearInterval(activeQuiz.timerInterval);
-            handleTimeOut();
-          }
-        }, 1000);
-      }
-    }
-
-    function updateTimerDisplay() {
-      const box = document.getElementById('quiz-timer-box');
-      const txt = document.getElementById('quiz-timer-text');
-      txt.textContent = `${activeQuiz.timeLeft}s`;
-      if (activeQuiz.timeLeft <= 8) {
-        box.className = "px-3.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center gap-1.5 text-xs font-bold text-rose-400 animate-pulse";
-      } else {
-        box.className = "px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 flex items-center gap-1.5 text-xs font-bold text-cyan-400";
-      }
-    }
-
-    function handleTimeOut() {
-      if (activeQuiz.answered) return;
-      submitAnswer(-1); // -1 indicates timed out
-    }
-
-    function submitAnswer(selectedIndex) {
-      if (activeQuiz.answered) return;
-      activeQuiz.answered = true;
-      clearInterval(activeQuiz.timerInterval);
-
-      const qObj = activeQuiz.questions[activeQuiz.currentIndex];
-      const isCorrect = selectedIndex === qObj.ans;
-
-      // Calculate XP (+20 per right answer, +5 speed bonus if answered with >15s left)
-      let gained = 0;
-      if (isCorrect) {
-        activeQuiz.score++;
-        const speedBonus = (setupState.useTimer && activeQuiz.timeLeft >= 15) ? 5 : 0;
-        gained = 20 + speedBonus;
-        activeQuiz.xpEarned += gained;
-        playTone('correct');
-      } else {
-        playTone('wrong');
-      }
-
-      document.getElementById('quiz-live-score').textContent = activeQuiz.score;
-
-      // Log for post-quiz review
-      activeQuiz.reviewLog.push({
-        question: qObj.q,
-        userAnswer: selectedIndex >= 0 ? qObj.options[selectedIndex] : 'Timed Out ⏱️',
-        correctAnswer: qObj.options[qObj.ans],
-        isCorrect,
-        explanation: qObj.exp
-      });
-
-      // Style all option buttons
-      document.querySelectorAll('.quiz-opt-btn').forEach((btn, idx) => {
-        btn.disabled = true;
-        btn.classList.remove('hover:bg-slate-800/90', 'hover:border-indigo-500/60', 'cursor-pointer');
-        if (idx === qObj.ans) {
-          btn.className = "quiz-opt-btn w-full p-4 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500 text-left flex items-center gap-3.5";
-        } else if (idx === selectedIndex && !isCorrect) {
-          btn.className = "quiz-opt-btn w-full p-4 rounded-2xl bg-rose-500/20 border-2 border-rose-500 text-left flex items-center gap-3.5";
-        } else {
-          btn.className = "quiz-opt-btn w-full p-4 rounded-2xl bg-slate-900/40 border border-slate-800/60 text-left flex items-center gap-3.5 opacity-55";
-        }
-      });
-
-      // Show Feedback & Explanation Banner
-      const fbBox = document.getElementById('quiz-feedback-box');
-      const fbIcon = document.getElementById('quiz-feedback-icon');
-      const fbTitle = document.getElementById('quiz-feedback-title');
-      const fbExp = document.getElementById('quiz-feedback-explanation');
-
-      fbBox.classList.remove('hidden');
-      if (isCorrect) {
-        fbBox.className = "rounded-2xl p-4 sm:p-5 border border-emerald-500/40 bg-emerald-500/10 animate-fade-in";
-        fbIcon.className = "w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0 mt-0.5 text-sm font-extrabold";
-        fbIcon.textContent = "✓";
-        fbTitle.className = "font-bold text-sm sm:text-base text-emerald-300";
-        fbTitle.textContent = `Correct! (+${gained} XP)`;
-      } else {
-        fbBox.className = "rounded-2xl p-4 sm:p-5 border border-rose-500/40 bg-rose-500/10 animate-fade-in";
-        fbIcon.className = "w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 mt-0.5 text-sm font-extrabold";
-        fbIcon.textContent = "✕";
-        fbTitle.className = "font-bold text-sm sm:text-base text-rose-300";
-        fbTitle.textContent = selectedIndex === -1
-          ? `Time's Up! Correct answer: ${qObj.options[qObj.ans]}`
-          : `Not quite! Correct answer: ${qObj.options[qObj.ans]}`;
-      }
-      fbExp.textContent = qObj.exp;
-
-      // Update progress bar to reflect completed question
-      const completedPct = Math.round(((activeQuiz.currentIndex + 1) / activeQuiz.questions.length) * 100);
-      document.getElementById('quiz-progress-pct').textContent = `${completedPct}%`;
-      document.getElementById('quiz-progress-bar').style.width = `${completedPct}%`;
-
-      // Show Next / Finish button
-      const nextBtn = document.getElementById('quiz-next-btn');
-      const isLast = activeQuiz.currentIndex === activeQuiz.questions.length - 1;
-      document.getElementById('quiz-next-btn-label').textContent = isLast ? 'See Final Results' : 'Next Question';
-      nextBtn.classList.remove('hidden');
-    }
-
-    function nextQuestion() {
-      if (activeQuiz.currentIndex < activeQuiz.questions.length - 1) {
-        activeQuiz.currentIndex++;
-        renderCurrentQuestion();
-      } else {
-        finishQuiz();
-      }
-    }
-
-    function confirmQuitQuiz() {
-      clearInterval(activeQuiz.timerInterval);
-      navigateTo('dashboard');
-      showToast('Quiz exited.', 'info');
-    }
-
-    /**
-     * =========================================================================
-     * 8. POST-QUIZ RESULTS & PERSISTENCE
-     * =========================================================================
-     */
-    function finishQuiz() {
-      playTone('complete');
-
-      const total = activeQuiz.questions.length;
-      const score = activeQuiz.score;
-      const accuracy = Math.round((score / total) * 100);
-      const elapsedSec = Math.max(1, Math.round((Date.now() - activeQuiz.startTime) / 1000));
-      const mins = Math.floor(elapsedSec / 60);
-      const secs = elapsedSec % 60;
-      const timeFormatted = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-
-      // Completion bonus XP (+25 XP)
-      const totalXpEarned = activeQuiz.xpEarned + 25;
-
-      // Update User Profile in localStorage
-      if (currentUser) {
-        currentUser.xp += totalXpEarned;
-        currentUser.history.unshift({
-          category: activeQuiz.bankKey,
-          title: activeQuiz.displayTitle,
-          score,
-          total,
-          accuracy,
-          xp: totalXpEarned,
-          date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-        });
-        persistCurrentUser();
-        refreshDashboardUI();
-      }
-
-      // Populate Results View
-      document.getElementById('result-category-label').textContent = activeQuiz.displayTitle;
-      document.getElementById('res-score').textContent = `${score} / ${total}`;
-      document.getElementById('res-accuracy').textContent = `${accuracy}%`;
-      document.getElementById('res-xp').textContent = `+${totalXpEarned} XP`;
-      document.getElementById('res-time').textContent = timeFormatted;
-
-      if (accuracy >= 80) {
-        document.getElementById('result-trophy-badge').textContent = '🏆';
-        document.getElementById('result-headline').textContent = 'Outstanding Mastery!';
-        document.getElementById('result-subtext').textContent = 'Incredible accuracy! You crushed this challenge.';
-      } else if (accuracy >= 50) {
-        document.getElementById('result-trophy-badge').textContent = '🌟';
-        document.getElementById('result-headline').textContent = 'Great Effort!';
-        document.getElementById('result-subtext').textContent = 'Solid performance. Review the explanations below to reach 100%!';
-      } else {
-        document.getElementById('result-trophy-badge').textContent = '📚';
-        document.getElementById('result-headline').textContent = 'Keep Practicing!';
-        document.getElementById('result-subtext').textContent = 'Every quiz makes you sharper. Check the explanations below and try again.';
-      }
-
-      // Render Question-by-Question Review
-      const reviewList = document.getElementById('results-review-list');
-      reviewList.innerHTML = activeQuiz.reviewLog.map((item, i) => `
-        <div class="p-4 rounded-2xl bg-slate-900/75 border ${item.isCorrect ? 'border-emerald-500/30' : 'border-rose-500/30'} space-y-1.5">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-white"><span class="text-slate-400 mr-1.5">${i + 1}.</span>${item.question}</p>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold shrink-0 ${item.isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">
-              ${item.isCorrect ? 'Correct' : 'Missed'}
-            </span>
-          </div>
-          <p class="text-xs text-slate-300">
-            Your Answer: <span class="${item.isCorrect ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}">${item.userAnswer}</span>
-            ${!item.isCorrect ? ` • Correct: <span class="text-emerald-400 font-semibold">${item.correctAnswer}</span>` : ''}
-          </p>
-          <p class="text-xs text-slate-400 pt-1">${item.explanation}</p>
-        </div>
-      `).join('');
-
-      navigateTo('results');
-    }
-
-    function replaySameQuiz() {
-      startConfiguredQuiz();
-    }
-
-    /**
-     * =========================================================================
-     * 9. USER PROFILE MODAL & TOAST NOTIFICATIONS
-     * =========================================================================
-     */
-    function openProfileModal() {
-      if (!currentUser) return;
-
-      const level = calculateLevel(currentUser.xp);
-      const xpInCurrentLevel = currentUser.xp % 250;
-      const xpPct = Math.round((xpInCurrentLevel / 250) * 100);
-
-      document.getElementById('prof-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
-      document.getElementById('prof-name').textContent = currentUser.name;
-      document.getElementById('prof-meta').textContent = `${currentUser.email} • ${currentUser.grade}`;
-      document.getElementById('prof-level-label').textContent = `Level ${level} Scholar`;
-      document.getElementById('prof-xp-progress-text').textContent = `${xpInCurrentLevel} / 250 XP to Level ${level + 1}`;
-      document.getElementById('prof-xp-bar').style.width = `${xpPct}%`;
-
-      // Render Badges
-      document.getElementById('prof-badges-grid').innerHTML = ACHIEVEMENTS.map(badge => {
-        const unlocked = badge.check(currentUser);
-        return `
-          <div class="p-3.5 rounded-2xl border ${unlocked ? 'bg-indigo-500/15 border-indigo-400/40' : 'bg-slate-900/50 border-slate-800 opacity-50'} text-center space-y-1">
-            <div class="text-2xl">${unlocked ? badge.icon : '🔒'}</div>
-            <p class="text-xs font-bold text-white">${badge.title}</p>
-            <p class="text-[11px] text-slate-400 leading-tight">${badge.desc}</p>
-          </div>
-        `;
-      }).join('');
-
-      // Render History
-      const histContainer = document.getElementById('prof-history-list');
-      if (currentUser.history.length === 0) {
-        histContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No quizzes completed yet. Pick a subject to start!</p>`;
-      } else {
-        histContainer.innerHTML = currentUser.history.slice(0, 10).map(h => `
-          <div class="p-3.5 rounded-2xl bg-slate-900/75 border border-slate-800 flex items-center justify-between gap-3">
-            <div>
-              <p class="text-sm font-semibold text-white">${h.title}</p>
-              <p class="text-xs text-slate-400">${h.date} • Score: ${h.score}/${h.total} (${h.accuracy}%)</p>
-            </div>
-            <span class="px-3 py-1 rounded-xl bg-amber-500/15 text-amber-400 text-xs font-bold shrink-0">
-              +${h.xp} XP
-            </span>
-          </div>
-        `).join('');
-      }
-
-      document.getElementById('profile-modal').classList.remove('hidden');
-    }
-
-    function closeProfileModal() {
-      document.getElementById('profile-modal').classList.add('hidden');
-    }
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      const colors = {
-        success: 'bg-emerald-600/95 border-emerald-400/50 text-white',
-        error: 'bg-rose-600/95 border-rose-400/50 text-white',
-        info: 'bg-slate-800/95 border-slate-600/50 text-slate-100'
-      };
-      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-md text-xs sm:text-sm font-semibold animate-slide-up ${colors[type] || colors.info}`;
-      toast.textContent = message;
-      container.appendChild(toast);
-
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-      }, 3200);
-    }
-
-    /**
-     * =========================================================================
-     * 10. INITIALIZATION ON WINDOW LOAD
-     * =========================================================================
-     */
-    window.onload = function () {
-      const savedEmail = localStorage.getItem(STORAGE_SESSION_KEY);
-      if (savedEmail) {
-        const db = getUsersDB();
-        if (db[savedEmail]) {
-          updateDailyStreak(db[savedEmail]);
-          loginUserSession(db[savedEmail]);
-          return;
-        }
-      }
-      // Otherwise remain on the Login & Create Account initial view
-    };
-  </script>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profile-modal" class="modal hidden">
+  <div class="panel modal-box wide scroll">
+    <button class="close" onclick="closeProfileModal()">✕</button>
+    <div class="modal-head"><span id="prof-avatar" class="avatar big">U</span>
+      <div><h3 id="prof-name">Student</h3><small id="prof-meta"></small></div></div>
+    <div class="card">
+      <div class="row-between"><b id="prof-level-label" class="label-blue">Level 1</b><small id="prof-xp-progress-text"></small></div>
+      <div class="bar"><div id="prof-xp-bar"></div></div>
+    </div>
+    <h4>Achievement Badges</h4>
+    <div id="prof-badges-grid" class="badges"></div>
+    <h4>Recent Quiz History</h4>
+    <div id="prof-history-list"></div>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
